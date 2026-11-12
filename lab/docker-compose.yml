@@ -1,0 +1,58 @@
+name: webminh22
+
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    hostname: ldap.lab.invalid
+    command: ["--copy-service"]
+    environment:
+      LDAP_ORGANISATION: Lab
+      LDAP_DOMAIN: lab.invalid
+      LDAP_ADMIN_PASSWORD: labldap
+      LDAP_CONFIG_PASSWORD: labconfig
+      LDAP_TLS: "false"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+    ports:
+      - "127.0.0.1:18471:389"
+      - "127.0.0.1:18472:636"
+      - "127.0.0.1:18473:1389"
+      - "127.0.0.1:18474:1636"
+    volumes:
+      - ./bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-labuser.ldif:ro
+    healthcheck:
+      test:
+        - CMD
+        - ldapsearch
+        - -x
+        - -H
+        - ldap://127.0.0.1:389
+        - -D
+        - cn=admin,dc=lab,dc=invalid
+        - -w
+        - labldap
+        - -b
+        - ou=People,dc=lab,dc=invalid
+        - "(uid=labuser)"
+        - dn
+      interval: 4s
+      timeout: 4s
+      retries: 30
+      start_period: 30s
+    mem_limit: 384m
+    restart: "no"
+
+  webmin:
+    image: webmin-lab:2.670
+    ports:
+      - "127.0.0.1:18470:10000"
+    volumes:
+      - ./entrypoint.sh:/lab-entrypoint.sh:ro
+    depends_on:
+      ldap:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/lab-entrypoint.sh"]
+    mem_limit: 512m
+    init: true
+    labels:
+      lab: WEBMIN-H22-LDAP-MV
+    restart: "no"

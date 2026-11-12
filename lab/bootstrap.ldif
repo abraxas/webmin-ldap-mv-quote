@@ -1,0 +1,28 @@
+dn: ou=People,dc=lab,dc=invalid
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,dc=lab,dc=invalid
+objectClass: organizationalUnit
+ou: Groups
+
+dn: cn=labusers,ou=Groups,dc=lab,dc=invalid
+objectClass: top
+objectClass: posixGroup
+cn: labusers
+gidNumber: 1001
+
+dn: uid=labuser,ou=People,dc=lab,dc=invalid
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: labuser
+sn: Lab
+cn: Lab User
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/labuser
+loginShell: /bin/sh
+userPassword: labuserpass
+gecos: Lab User
